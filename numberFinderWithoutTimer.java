@@ -174,9 +174,9 @@ public class numberFinderWithoutTimer {
                                     break;
                                 } else {
                                     System.out.println(point + " Puan aldınız");
-                                    System.out.println("Sayıyı bulmaya devam Etmek ister misiniz (evet/hayır)");
+                                    System.out.println("Sayıyı bulmaya devam Etmek ister misiniz (yes/no)");
                                     String decision = input.nextLine();
-                                    if (decision.equals("hayır")) {
+                                    if (decision.equals("no")) {
                                         System.out.println("Puanınız: " + point);
                                         writer.write("\n" + point);
                                         break;
