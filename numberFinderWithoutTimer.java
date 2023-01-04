@@ -3,48 +3,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Arrays;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
 
 public class numberFinderWithoutTimer {
 
-    /*public static class timeIsUp extends TimerTask {
-
-        public static boolean timeChecker = false;
-
-        @Override
-        public void run(){
-            timeChecker = true;
-            System.out.println("Zaman doldu");
-            System.out.println("Lütfen yeni oyun başlatınız ('y' tuşunu giriniz)");
-        }
-    }
-
-    public static class timeLeft20 extends TimerTask {
-
-        @Override
-        public void run(){
-            System.out.println("20 saniyeniz kaldı");
-        }
-    }
-
-    public static class timeLeft10 extends TimerTask {
-
-        @Override
-        public void run(){
-            System.out.println("10 saniyeniz kaldı");
-        }
-    }
-
-    public static class timeLeft5 extends TimerTask {
-
-        @Override
-        public void run(){
-            System.out.println("5 saniyeniz kaldı");
-        }
-    }*/
 
     // get a random 3 digit number that is not prime
     public static int notPrime3digitRandom() {
@@ -111,18 +73,18 @@ public class numberFinderWithoutTimer {
         System.out.println("Yeni oyuna geçmek için 'y' tuşuna basınız");
         System.out.println("Oyunu kapatmak için 'q' tuşuna basınız");
         System.out.println("Yüksek Skorlara bakmak için 'skor' yazınız");
-        System.out.println("Ana menüye dönmek için 'm' tuşuna basınız");
 
     }
 
     public static void main(String[] args) {
         try {
 
-            File fileObj = new File("C:\\Users\\turan\\IdeaProjects\\extra\\src\\highScores.txt");
+            File file = new File("highScores.txt");
 
-            FileWriter writer = new FileWriter("C:\\Users\\turan\\IdeaProjects\\extra\\src\\highScores.txt", true);
+            FileWriter writer = new FileWriter("highScores.txt", true);
 
             mainMenuGreet(); // print the overview of game
+
             outerLoop: // game loop, if you break this loop game will close
             while (true) { // this loop starts a new game
                 Scanner input = new Scanner(System.in);
@@ -139,18 +101,8 @@ public class numberFinderWithoutTimer {
                 // generate 2 digit number one time
                 int numberTwoDigit = ThreadLocalRandom.current().nextInt(10, 100);
                 guessNumbers.add(numberTwoDigit);
-
-                // create the timers
-               /* Timer timer = new Timer();
-                timer.schedule(new timeIsUp(), 180000); // 3 min
-                timer.schedule(new timeLeft20(), 160000); // 20 sec left
-                timer.schedule(new timeLeft10(), 170000); // 10 sec left
-                timer.schedule(new timeLeft5(), 175000); // 5 sec left
-                */
-                long start = System.currentTimeMillis(); // count the elapsed time to find the game time
-
                 int count = 1; // at the beginning of the turn make the count number 1
-                while (true) { // loop for game turn
+                while (true) { // loop for each game turn
                     try {
                         if (count != 5) { // if guess is not over
                             System.out.println("Hedef Sayı: " + targetNumber);
@@ -165,76 +117,82 @@ public class numberFinderWithoutTimer {
                         System.out.println(count + ". işlem"); // print the guess number
                         System.out.println("İşlem giriniz: ");
                         String op = input.nextLine(); // take the operation as string
-                        /*if (timeIsUp.timeChecker) { // if timerTask(timeIsUp) runs start a new game
-                            System.out.println("Yeni oyuna geçiliyor...");
-                            timer.cancel();
-                            timer.purge();
-                            timeIsUp.timeChecker = false;
-                            break;
-                        }*/
+
                         if (op.equals("y")) {
                             System.out.println("Yeni oyuna geçiliyor...");
                             break;
                         }
                         if (op.equals("q")) {
                             System.out.println("Kapanıyor...");
+                            writer.flush();
                             System.exit(0);
                         }
-                        String[] asd = mathParser(op);
-                        int firstOperand = Integer.parseInt(asd[0]);
-                        int secondOperand = Integer.parseInt(asd[2]);
-                        if (!(guessNumbers.contains(firstOperand) && guessNumbers.contains(secondOperand))) {
-                            System.out.println("İşlemdeki sayılar kullanılabilecek sayılar arasında değil");
-                            throw new Exception();
+                        if (op.equals("skor")) {
+                            BufferedReader br = new BufferedReader(new FileReader(file));
+                            count--;
+                            String st;
+                            // Condition holds true till
+                            // there is character in a string
+                            while ((st = br.readLine()) != null)
+                                // Print the string
+                                System.out.println(st);
                         }
-                        char operator = asd[1].charAt(0);
-                        int result = 0;
-                        if (operator == '+') {
-                            result = firstOperand + secondOperand;
-                        } else if (operator == '-') {
-                            result = firstOperand - secondOperand;
-                        } else if (operator == '*') {
-                            result = firstOperand * secondOperand;
-                        } else if (operator == '/') {
-                            result = firstOperand / secondOperand;
-                        }
-                        System.out.println("Sonuç: " + result);
-                        guessNumbers.remove(new Integer(firstOperand));
-                        guessNumbers.remove(new Integer(secondOperand));
-                        guessNumbers.add(result);
-                        int point = pointCalc(result, targetNumber);
-                        if (point == 25) {
-                            //timer.cancel();
-                            long end = System.currentTimeMillis();
-                            long elapsedTime = (end - start) / 1000;
-                            System.out.println("Tebrikler... Sayıyı buldunuz");
-                            System.out.println("Puanınız: " + point);
-                            writer.write(point + "\t" + java.time.LocalDate.now() + "\t" + elapsedTime);
-                            break;
-                        }
-                        else if (point != 0) {
-                            System.out.println(point + " Puan aldınız");
-                            System.out.println("Sayıyı bulmaya devam Etmek ister misiniz (evet/hayır)");
-                            String decision = input.nextLine();
-                            if (decision.equals("hayır")) {
-                                //timer.cancel();
-                                //timer.purge();
-                                long end = System.currentTimeMillis();
-                                long elapsedTime = (end - start) / 1000;
+                        else {
+                            String[] asd = mathParser(op);
+                            int firstOperand = Integer.parseInt(asd[0]);
+                            int secondOperand = Integer.parseInt(asd[2]);
+                            if (!(guessNumbers.contains(firstOperand) && guessNumbers.contains(secondOperand))) {
+                                System.out.println("İşlemdeki sayılar kullanılabilecek sayılar arasında değil");
+                                throw new Exception();
+                            }
+                            char operator = asd[1].charAt(0);
+                            int result = 0;
+                            if (operator == '+') {
+                                result = firstOperand + secondOperand;
+                            } else if (operator == '-') {
+                                result = firstOperand - secondOperand;
+                            } else if (operator == '*') {
+                                result = firstOperand * secondOperand;
+                            } else if (operator == '/') {
+                                result = firstOperand / secondOperand;
+                            }
+                            System.out.println("Sonuç: " + result);
+                            guessNumbers.remove(new Integer(firstOperand));
+                            guessNumbers.remove(new Integer(secondOperand));
+                            guessNumbers.add(result);
+                            int point = pointCalc(result, targetNumber);
+                            if (point == 25) {
+                                System.out.println("Tebrikler... Sayıyı buldunuz");
                                 System.out.println("Puanınız: " + point);
-                                writer.write(point + "\t" + java.time.LocalDate.now() + "\t" + elapsedTime);
-                                count = 0;
+                                writer.write("\n" + point);
                                 break;
-                            } else {
-                                continue;
+                            } else if (point > 0) {
+                                if (count == 4) {
+                                    System.out.println("İşlem hakkınız bitti");
+                                    System.out.println(point + " Puan aldınız");
+                                    System.out.println("Yeni oyuna geçiliyor...");
+                                    break;
+                                } else {
+                                    System.out.println(point + " Puan aldınız");
+                                    System.out.println("Sayıyı bulmaya devam Etmek ister misiniz (evet/hayır)");
+                                    String decision = input.nextLine();
+                                    if (decision.equals("hayır")) {
+                                        System.out.println("Puanınız: " + point);
+                                        writer.write("\n" + point);
+                                        break;
+                                    } else {
+                                        count++;
+                                        continue;
+                                    }
+                                }
                             }
                         }
-                        writer.close();
                         count++;
                     } catch (Exception e) {
                         System.out.println("hatalı işlem");
                     }
                 }
+                writer.flush();
             }
         }
         catch (FileNotFoundException e) {
